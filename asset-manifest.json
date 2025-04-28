@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/MRR-Monthly-Analysis-App/static/css/main.ddf9235b.css",
+    "main.js": "/MRR-Monthly-Analysis-App/static/js/main.e48a8668.js",
+    "index.html": "/MRR-Monthly-Analysis-App/index.html",
+    "main.ddf9235b.css.map": "/MRR-Monthly-Analysis-App/static/css/main.ddf9235b.css.map",
+    "main.e48a8668.js.map": "/MRR-Monthly-Analysis-App/static/js/main.e48a8668.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ddf9235b.css",
+    "static/js/main.e48a8668.js"
+  ]
+}

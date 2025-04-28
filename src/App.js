@@ -6,6 +6,7 @@ const MRRReport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [reportTitle, setReportTitle] = useState('MRR Changes Report');
+  const [viewMode, setViewMode] = useState('portrait');
 
   const processCSV = (file) => {
     setIsLoading(true);
@@ -164,7 +165,17 @@ const MRRReport = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">{reportTitle}</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">{reportTitle}</h1>
+        {reportData && (
+          <button
+            onClick={() => setViewMode(viewMode === 'portrait' ? 'landscape' : 'portrait')}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+          >
+            {viewMode === 'portrait' ? 'Landscape View' : 'Portrait View'}
+          </button>
+        )}
+      </div>
       
       <div className="mb-8">
         <label className="block text-gray-700 mb-2">Upload MRR Report CSV:</label>
@@ -192,66 +203,183 @@ const MRRReport = () => {
             MRR Changes for {reportData.reportPeriod}
           </h2>
           
-          <div className="overflow-x-auto mb-8">
-            <table className="min-w-full bg-white border border-gray-200">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Company Name
-                  </th>
-                  <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    MRR Change
-                  </th>
-                  <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.tableData.map((row, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="py-2 px-4 border-b border-gray-200 text-sm">
-                      {row.companyName}
-                    </td>
-                    <td className={`py-2 px-4 border-b border-gray-200 text-sm ${row.mrrChangeValue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {row.mrrChangeValue >= 0 ? '+' : ''}${Math.abs(row.mrrChangeValue).toFixed(2)}
-                    </td>
-                    <td className="py-2 px-4 border-b border-gray-200 text-sm">
-                      {row.category}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {viewMode === 'portrait' ? (
+            // Portrait View (Original)
+            <div>
+              <div className="overflow-x-auto mb-8">
+                <table className="min-w-full bg-white border border-gray-200">
+                  <thead>
+                    <tr>
+                      <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Company Name
+                      </th>
+                      <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        MRR Change
+                      </th>
+                      <th className="py-2 px-4 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.tableData.map((row, index) => (
+                      <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                        <td className="py-2 px-4 border-b border-gray-200 text-sm">
+                          {row.companyName}
+                        </td>
+                        <td className={`py-2 px-4 border-b border-gray-200 text-sm ${row.mrrChangeValue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {row.mrrChangeValue >= 0 ? '' : '-'}${Math.abs(row.mrrChangeValue).toFixed(2)}
+                        </td>
+                        <td className="py-2 px-4 border-b border-gray-200 text-sm">
+                          {row.category}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          <h3 className="text-lg font-semibold mb-2">Summary by Category</h3>
-          <div className="bg-gray-50 p-4 rounded-md mb-4">
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className="text-left py-2 text-sm text-gray-600">Category</th>
-                  <th className="text-left py-2 text-sm text-gray-600">MRR Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(reportData.categoryTotals).map(([category, total], index) => (
-                  <tr key={index}>
-                    <td className="py-1 text-sm">{category}</td>
-                    <td className={`py-1 text-sm ${total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {total >= 0 ? '+' : ''}${Math.abs(total).toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="border-t border-gray-200">
-                  <td className="py-2 font-semibold text-sm">Total Net MRR Change</td>
-                  <td className={`py-2 font-semibold text-sm ${reportData.totalNetMrrChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {reportData.totalNetMrrChange >= 0 ? '+' : ''}${Math.abs(reportData.totalNetMrrChange).toFixed(2)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              <h3 className="text-lg font-semibold mb-2">Summary by Category</h3>
+              <div className="bg-gray-50 p-4 rounded-md mb-4">
+                <table className="w-full">
+                  <thead>
+                    <tr>
+                      <th className="text-left py-2 text-sm text-gray-600">Category</th>
+                      <th className="text-left py-2 text-sm text-gray-600">MRR Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(reportData.categoryTotals).map(([category, total], index) => (
+                      <tr key={index}>
+                        <td className="py-1 text-sm">{category}</td>
+                        <td className={`py-1 text-sm ${total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {total >= 0 ? '' : '-'}${Math.abs(total).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="border-t border-gray-200">
+                      <td className="py-2 font-semibold text-sm">Total Net MRR Change</td>
+                      <td className={`py-2 font-semibold text-sm ${reportData.totalNetMrrChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {reportData.totalNetMrrChange >= 0 ? '' : '-'}${Math.abs(reportData.totalNetMrrChange).toFixed(2)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            // Landscape View (3-column layout)
+            <div className="flex flex-wrap -mx-2">
+              {/* Section 1: New and Expansion */}
+              <div className="w-full md:w-1/3 px-2 mb-4">
+                <h3 className="text-lg font-semibold mb-2">New & Expansion</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full bg-white border border-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="py-1 px-2 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Company
+                        </th>
+                        <th className="py-1 px-2 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          MRR Change
+                        </th>
+                        <th className="py-1 px-2 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reportData.tableData
+                        .filter(row => row.category === 'New' || row.category === 'Expansion')
+                        .map((row, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="py-1 px-2 border-b border-gray-200 text-xs">
+                              {row.companyName}
+                            </td>
+                            <td className={`py-1 px-2 border-b border-gray-200 text-xs ${row.mrrChangeValue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {row.mrrChangeValue >= 0 ? '' : '-'}${Math.abs(row.mrrChangeValue).toFixed(2)}
+                            </td>
+                            <td className="py-1 px-2 border-b border-gray-200 text-xs">
+                              {row.category}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Section 2: Contraction and Churn */}
+              <div className="w-full md:w-1/3 px-2 mb-4">
+                <h3 className="text-lg font-semibold mb-2">Contraction & Churn</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full bg-white border border-gray-200">
+                    <thead>
+                      <tr>
+                        <th className="py-1 px-2 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Company
+                        </th>
+                        <th className="py-1 px-2 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          MRR Change
+                        </th>
+                        <th className="py-1 px-2 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Type
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reportData.tableData
+                        .filter(row => row.category === 'Contraction' || row.category === 'Churn')
+                        .map((row, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="py-1 px-2 border-b border-gray-200 text-xs">
+                              {row.companyName}
+                            </td>
+                            <td className={`py-1 px-2 border-b border-gray-200 text-xs ${row.mrrChangeValue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {row.mrrChangeValue >= 0 ? '' : '-'}${Math.abs(row.mrrChangeValue).toFixed(2)}
+                            </td>
+                            <td className="py-1 px-2 border-b border-gray-200 text-xs">
+                              {row.category}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Section 3: Summary */}
+              <div className="w-full md:w-1/3 px-2 mb-4">
+                <h3 className="text-lg font-semibold mb-2">Summary</h3>
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th className="text-left py-1 text-xs text-gray-600">Category</th>
+                        <th className="text-left py-1 text-xs text-gray-600">MRR Change</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(reportData.categoryTotals).map(([category, total], index) => (
+                        <tr key={index}>
+                          <td className="py-1 text-xs">{category}</td>
+                          <td className={`py-1 text-xs ${total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {total >= 0 ? '' : '-'}${Math.abs(total).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="border-t border-gray-200">
+                        <td className="py-1 font-semibold text-xs">Total Net MRR Change</td>
+                        <td className={`py-1 font-semibold text-xs ${reportData.totalNetMrrChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {reportData.totalNetMrrChange >= 0 ? '' : '-'}${Math.abs(reportData.totalNetMrrChange).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className="flex justify-between mt-6">
             <button 

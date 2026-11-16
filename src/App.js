@@ -56,7 +56,7 @@ const MRRReport = () => {
     
     // Extract date from filename if possible
     let reportPeriod = '';
-    const dateRangeMatch = file.name.match(/(\d{8})(\d{8})/);
+    const dateRangeMatch = file.name.match(/(\d{8})-?(\d{8})/);
     if (dateRangeMatch) {
       const startDate = dateRangeMatch[1];
       const startYear = startDate.substring(0, 4);

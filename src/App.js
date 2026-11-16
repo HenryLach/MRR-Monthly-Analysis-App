@@ -1,6 +1,48 @@
 import React, { useState } from 'react';
 import Papa from 'papaparse';
 
+const formatMoney = (value) => `${value >= 0 ? '' : '-'}$${Math.abs(value).toFixed(2)}`;
+const moneyColor = (value) => (value >= 0 ? 'text-green-600' : 'text-red-600');
+
+// Summary rows shared by the portrait and landscape views.
+// textSize / totalPad let each view keep its own density.
+const SummaryRows = ({ reportData, textSize, totalPad }) => {
+  const { categoryTotals, totalGain, totalLoss, totalNetMrrChange, lossPercentage } = reportData;
+  const categoryRow = (category) =>
+    category in categoryTotals && (
+      <tr key={category}>
+        <td className={`py-1 ${textSize}`}>{category}</td>
+        <td className={`py-1 ${textSize} ${moneyColor(categoryTotals[category])}`}>
+          {formatMoney(categoryTotals[category])}
+        </td>
+      </tr>
+    );
+  const totalRow = (label, value, extraClass = '') => (
+    <tr className={extraClass}>
+      <td className={`${totalPad} font-semibold ${textSize}`}>{label}</td>
+      <td className={`${totalPad} font-semibold ${textSize} ${moneyColor(value)}`}>{formatMoney(value)}</td>
+    </tr>
+  );
+
+  return (
+    <>
+      {categoryRow('New')}
+      {categoryRow('Expansion')}
+      {totalRow('Total Gain', totalGain, 'border-b border-gray-200')}
+      {categoryRow('Contraction')}
+      {categoryRow('Churn')}
+      {totalRow('Total Loss', totalLoss, 'border-b border-gray-200')}
+      {totalRow('Total Net MRR Change', totalNetMrrChange)}
+      <tr>
+        <td className={`${totalPad} font-semibold ${textSize}`}>Loss Percentage</td>
+        <td className={`${totalPad} font-semibold ${textSize}`}>
+          {lossPercentage === null ? '—' : `${lossPercentage.toFixed(1)}%`}
+        </td>
+      </tr>
+    </>
+  );
+};
+
 const MRRReport = () => {
   const [reportData, setReportData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -148,10 +190,18 @@ const MRRReport = () => {
       (acc, item) => acc + item.mrrChangeValue, 0
     );
 
+    const totalGain = (categoryTotals['New'] || 0) + (categoryTotals['Expansion'] || 0);
+    const totalLoss = (categoryTotals['Contraction'] || 0) + (categoryTotals['Churn'] || 0);
+    // Loss as a share of gain; null when there was no gain to divide by
+    const lossPercentage = totalGain > 0 ? (Math.abs(totalLoss) / totalGain) * 100 : null;
+
     return {
       tableData: consolidatedData,
       categoryTotals,
+      totalGain,
+      totalLoss,
       totalNetMrrChange,
+      lossPercentage,
       reportPeriod
     };
   };
@@ -249,20 +299,7 @@ const MRRReport = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(reportData.categoryTotals).map(([category, total], index) => (
-                      <tr key={index}>
-                        <td className="py-1 text-sm">{category}</td>
-                        <td className={`py-1 text-sm ${total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {total >= 0 ? '' : '-'}${Math.abs(total).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="border-t border-gray-200">
-                      <td className="py-2 font-semibold text-sm">Total Net MRR Change</td>
-                      <td className={`py-2 font-semibold text-sm ${reportData.totalNetMrrChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {reportData.totalNetMrrChange >= 0 ? '' : '-'}${Math.abs(reportData.totalNetMrrChange).toFixed(2)}
-                      </td>
-                    </tr>
+                    <SummaryRows reportData={reportData} textSize="text-sm" totalPad="py-2" />
                   </tbody>
                 </table>
               </div>
@@ -360,20 +397,7 @@ const MRRReport = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {Object.entries(reportData.categoryTotals).map(([category, total], index) => (
-                        <tr key={index}>
-                          <td className="py-1 text-xs">{category}</td>
-                          <td className={`py-1 text-xs ${total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {total >= 0 ? '' : '-'}${Math.abs(total).toFixed(2)}
-                          </td>
-                        </tr>
-                      ))}
-                      <tr className="border-t border-gray-200">
-                        <td className="py-1 font-semibold text-xs">Total Net MRR Change</td>
-                        <td className={`py-1 font-semibold text-xs ${reportData.totalNetMrrChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {reportData.totalNetMrrChange >= 0 ? '' : '-'}${Math.abs(reportData.totalNetMrrChange).toFixed(2)}
-                        </td>
-                      </tr>
+                      <SummaryRows reportData={reportData} textSize="text-xs" totalPad="py-1" />
                     </tbody>
                   </table>
                 </div>

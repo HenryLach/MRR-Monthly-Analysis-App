@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mrr-report-app",
+      "runtimeExecutable": "C:\\Users\\HenryLach\\AppData\\Local\\mise\\installs\\node\\24.21.0\\node.exe",
+      "runtimeArgs": ["node_modules/react-scripts/bin/react-scripts.js", "start"],
+      "env": { "BROWSER": "none" },
+      "port": 3000
+    }
+  ]
+}

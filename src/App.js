@@ -7,7 +7,7 @@ const moneyColor = (value) => (value >= 0 ? 'text-green-600' : 'text-red-600');
 // Summary rows shared by the portrait and landscape views.
 // textSize / totalPad let each view keep its own density.
 const SummaryRows = ({ reportData, textSize, totalPad }) => {
-  const { categoryTotals, totalGain, totalLoss, totalNetMrrChange, lossPercentage } = reportData;
+  const { categoryTotals, totalGain, totalLoss, totalNetMrrChange, lossPercentage, quickRatio } = reportData;
   const categoryRow = (category) =>
     category in categoryTotals && (
       <tr key={category}>
@@ -37,6 +37,12 @@ const SummaryRows = ({ reportData, textSize, totalPad }) => {
         <td className={`${totalPad} font-semibold ${textSize}`}>Loss Percentage</td>
         <td className={`${totalPad} font-semibold ${textSize}`}>
           {lossPercentage === null ? '—' : `${lossPercentage.toFixed(1)}%`}
+        </td>
+      </tr>
+      <tr>
+        <td className={`${totalPad} font-semibold ${textSize}`}>Quick Ratio</td>
+        <td className={`${totalPad} font-semibold ${textSize}`}>
+          {quickRatio === null ? '—' : quickRatio.toFixed(2)}
         </td>
       </tr>
     </>
@@ -194,6 +200,8 @@ const MRRReport = () => {
     const totalLoss = (categoryTotals['Contraction'] || 0) + (categoryTotals['Churn'] || 0);
     // Loss as a share of gain; null when there was no gain to divide by
     const lossPercentage = totalGain > 0 ? (Math.abs(totalLoss) / totalGain) * 100 : null;
+    // SaaS Quick Ratio: gain per $1 lost; null when there was no loss to divide by
+    const quickRatio = totalLoss < 0 ? totalGain / Math.abs(totalLoss) : null;
 
     return {
       tableData: consolidatedData,
@@ -202,6 +210,7 @@ const MRRReport = () => {
       totalLoss,
       totalNetMrrChange,
       lossPercentage,
+      quickRatio,
       reportPeriod
     };
   };

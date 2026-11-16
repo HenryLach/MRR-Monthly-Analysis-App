@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# OneDrive files
+node_modules.lnk
+.onedriveignore
